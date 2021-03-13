@@ -10,66 +10,58 @@ namespace WhatBetNN
     {
         public int earnedMoney;
 
-        private readonly int[] inputN = new int[] { 1 };
-        public float iow { get; private set; } // input-output weight
+        /// <remarks>
+        /// [0] - money
+        /// [1] - how long live
+        /// </remarks>
+        public float[] Weights { get; private set; }
 
-        // Low - Important
-        private const int liveRate = 50;
-        // High - Important
-        private const int productivityRate = 5;
-        private const int unproductivityRate = 3;
+        private float mutationAmplitude = 2;
 
-        public NN(float iowNum = 5)
+        public NN(float[] parentWeights)
         {
-            iow = iowNum;
+            Weights = new float[2];
+            Weights = mutateWeights(parentWeights);
         }
 
-        public int Think(int money)
+        public int Think(int money, int howLongLive)
         {
-            int betFormule;
+            float betFormule;
 
-            while(true)
+            while (true)
             {
-                betFormule = Convert.ToInt32(inputN[0] * iow);
-
-                if (money == 0)
-                {
-                    return 0;
-                }
+                betFormule = money * Weights[0] + howLongLive * Weights[1];
 
                 if (money >= betFormule)
                 {
-                    if (betFormule > 0)
+                    if (Convert.ToInt32(betFormule) > 0)
                     {
                         break;
                     }
                     else
                     {
-                        iow++;
+                        return -1;
                     }
                 }
                 else
                 {
-                    iow--;
+                    return -1;
                 }
             }
 
-            return betFormule;
+            return Convert.ToInt32(betFormule);
         }
 
-        public void CheckProductivity(int money, int howLongLive)
+        private float[] mutateWeights(float[] parentWeights)
         {
-            int unproductivityKoef = (productivityRate * howLongLive) - money;
+            float[] mutatedWeights = new float[parentWeights.Length];
 
-            if(unproductivityKoef > 0)
+            for (int i = 0; i < Weights.Length; i++)
             {
-                iow += (liveRate / howLongLive) * new Random().Next(-2, 2);
+                mutatedWeights[i] = parentWeights[i] + (mutationAmplitude * (new Random().Next(0, 20000) / 10000f - 1));
             }
-        }
 
-        public void Lose(int howLongLive)
-        {
-            iow += (liveRate / howLongLive) * new Random().Next(-2, 2);
+            return mutatedWeights;
         }
     }
 }

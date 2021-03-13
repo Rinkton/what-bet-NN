@@ -14,7 +14,7 @@ namespace WhatBetNN
         {
             for (int i = 0; i < allNNs.Length; i++)
             {
-                allNNs[i] = new NN();
+                allNNs[i] = new NN(new float[] { 1, 1 });
             }
         }
 
@@ -29,12 +29,28 @@ namespace WhatBetNN
 
                 while (true)
                 {
+                    if (money == 0)
+                    {
+                        Console.WriteLine("You bankrupted");
+                        nn.earnedMoney = 0;
+                        i = 0;
+                        break;
+                    }
+
                     Console.WriteLine("Your money: " + money);
 
-                    int bet = nn.Think(money);
+                    int bet = nn.Think(money, howLongLive);
                     Console.WriteLine("Your bet: " + bet);
 
-                    if (bet <= 0 || bet > money)
+                    if (bet < 0)
+                    {
+                        Console.WriteLine("You dumb");
+                        nn.earnedMoney = -1;
+                        i = 0;
+                        break;
+                    }
+
+                    if (bet > money)
                     {
                         Console.WriteLine("You don't have those money!");
                         continue;
@@ -51,19 +67,10 @@ namespace WhatBetNN
                     }
                     else
                     {
-                        Console.WriteLine("You Lose!");
+                        Console.WriteLine("You lose!");
                     }
 
-                    if (money == 0)
-                    {
-                        Console.WriteLine("You bankrupted");
-                        nn.Lose(howLongLive);
-                        nn.earnedMoney = 0;
-                        i = 0;
-                        break;
-                    }
-
-                    int NNTimes = 1000;
+                    int NNTimes = 5;
 
                     if (i > NNTimes)
                     {
@@ -72,7 +79,6 @@ namespace WhatBetNN
                         break;
                     }
 
-                    nn.CheckProductivity(money, howLongLive);
                     howLongLive++;
                     i++;
                 }
@@ -112,7 +118,7 @@ namespace WhatBetNN
 
             for (int i = 0; i < allNNs.Length; i++)
             {
-                allNNs[i] = new NN(allNNs[bestNumYet].iow);
+                allNNs[i] = new NN(allNNs[bestNumYet].Weights);
             }
 
             Main();
